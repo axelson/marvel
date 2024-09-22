@@ -33,7 +33,7 @@ defmodule Marvel.CLI.Comics do
     |> Utils.process_results(&Utils.format_event_output/1)
   end
 
-  def series(id) do
+  def creators(id) do
     Marvel.API.Comics.creators(id)
     |> Utils.process_results(&Utils.format_creator_output/1)
   end

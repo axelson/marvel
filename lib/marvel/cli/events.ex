@@ -29,7 +29,7 @@ defmodule Marvel.CLI.Events do
   end
 
   def characters(id) do
-    Marvel.API.Events.events(id)
+    Marvel.API.Events.characters(id)
     |> Utils.process_results(&Utils.format_character_output/1)
   end
 
