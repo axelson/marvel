@@ -6,6 +6,7 @@ defmodule Marvel.Mixfile do
       app: :marvel,
       version: "1.0.0",
       elixir: "~> 1.15",
+      elixirc_paths: elixirc_paths(Mix.env()),
       escript: escript_config(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -28,6 +29,9 @@ defmodule Marvel.Mixfile do
   def application do
     [extra_applications: [:logger, :runtime_tools, :httpoison]]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
