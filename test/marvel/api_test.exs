@@ -1,16 +1,14 @@
 defmodule Marvel.API.Test do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   import Mox
 
-  alias Marvel.API.{
-    Characters,
-    Comics,
-    Creators,
-    Events,
-    Series,
-    Stories
-  }
+  alias Marvel.API.Characters
+  alias Marvel.API.Comics
+  alias Marvel.API.Creators
+  alias Marvel.API.Events
+  alias Marvel.API.Series
+  alias Marvel.API.Stories
 
   alias Marvel.Test.MockHelpers
 
