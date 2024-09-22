@@ -1,20 +1,61 @@
 defmodule Marvel.CLI.Utils do
   @moduledoc false
 
-  @output_config :print_lines
+  require Jason.Helpers
 
-  def process_results(result, format_fn) do
+  @default_output_config :print_lines
+
+  def process_results(result, format_fn, output_config \\ @default_output_config) do
     case result do
       {:ok, response} ->
-        show_attribution(response)
-        Enum.map(response["data"]["results"], &format_fn.(&1))
+        case output_config do
+          :print_lines ->
+            print_attribution(response)
+
+            for result <- response["data"]["results"], lines = format_fn.(result) do
+              lines
+              |> Enum.map(fn {header, value} -> format_row(header, value) end)
+            end
+            |> Enum.join("\n\n")
+            |> IO.puts()
+
+          :print_json ->
+            %{
+              meta: meta_json(response),
+              results:
+                for result <- response["data"]["results"], lines = format_fn.(result) do
+                  lines
+                  |> Jason.OrderedObject.new()
+                end
+            }
+            |> Jason.encode!(pretty: true)
+            |> IO.puts()
+        end
 
       {:error, body} ->
-        IO.puts(body["message"])
+        case output_config do
+          :print_lines ->
+            IO.puts(body["message"])
+
+          :print_json ->
+            {:error, %{message: body["message"]}}
+            |> Jason.encode!(pretty: true)
+            |> IO.puts()
+        end
     end
   end
 
-  def show_attribution(data) do
+  def meta_json(data) do
+    %{
+      attribution: data["attributionText"],
+      offset: data["data"]["offset"],
+      limit: data["data"]["limit"],
+      total: data["data"]["total"],
+      count: data["data"]["count"]
+    }
+  end
+
+  def print_attribution(data) do
     print_metadata("#{data["attributionText"]}")
 
     offset = data["data"]["offset"]
@@ -23,14 +64,6 @@ defmodule Marvel.CLI.Utils do
     count = data["data"]["count"]
 
     print_metadata("offset: #{offset} limit: #{limit} total: #{total} count: #{count}")
-    print_end()
-  end
-
-  def print_output(lines, :print_lines) do
-    for {header, value} <- lines do
-      print_row(header, value)
-    end
-
     print_end()
   end
 
@@ -55,7 +88,6 @@ defmodule Marvel.CLI.Utils do
       {"Events", events_available},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   def format_comic_output(comic) do
@@ -86,7 +118,6 @@ defmodule Marvel.CLI.Utils do
       {"Events", events},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   def format_event_output(event) do
@@ -117,7 +148,6 @@ defmodule Marvel.CLI.Utils do
       {"Creators", creators},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   def format_series_output(series) do
@@ -150,7 +180,6 @@ defmodule Marvel.CLI.Utils do
       {"Creators", creators},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   def format_story_output(story) do
@@ -179,7 +208,6 @@ defmodule Marvel.CLI.Utils do
       {"Creators", creators},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   def format_creator_output(creator) do
@@ -202,7 +230,6 @@ defmodule Marvel.CLI.Utils do
       {"Stories", stories},
       {"Image", image}
     ]
-    |> print_output(@output_config)
   end
 
   defp print_end() do
@@ -210,8 +237,8 @@ defmodule Marvel.CLI.Utils do
     "" |> IO.puts()
   end
 
-  defp print_row(key, value) do
-    IO.puts(IO.ANSI.format([:red, "#{key}: ", :white, "#{value}"], true))
+  defp format_row(key, value) do
+    IO.ANSI.format([:red, "#{key}: ", :white, "#{value}", "\n"], true)
   end
 
   defp print_metadata(meta) do
