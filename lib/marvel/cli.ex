@@ -17,8 +17,8 @@ defmodule Marvel.CLI do
   def parse_args(args) do
     switches = [
       id: :integer,
-      name: :binary,
-      search: :binary,
+      name: :string,
+      search: :string,
       comics: :boolean,
       events: :boolean,
       series: :boolean,
