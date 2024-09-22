@@ -1,6 +1,8 @@
 defmodule Marvel.CLI.Utils do
   @moduledoc false
 
+  @output_config :print_lines
+
   def process_results(result, format_fn) do
     case result do
       {:ok, response} ->
@@ -24,6 +26,14 @@ defmodule Marvel.CLI.Utils do
     print_end()
   end
 
+  def print_output(lines, :print_lines) do
+    for {header, value} <- lines do
+      print_row(header, value)
+    end
+
+    print_end()
+  end
+
   def format_character_output(character) do
     id = character["id"]
     name = character["name"]
@@ -35,15 +45,17 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(character["thumbnail"])
 
-    print_row("Name", name)
-    print_row("ID", id)
-    print_row("Description", description)
-    print_row("Comics", comics_available)
-    print_row("Series", series_available)
-    print_row("Stories", stories_available)
-    print_row("Events", events_available)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Name", name},
+      {"ID", id},
+      {"Description", description},
+      {"Comics", comics_available},
+      {"Series", series_available},
+      {"Stories", stories_available},
+      {"Events", events_available},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   def format_comic_output(comic) do
@@ -61,18 +73,20 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(comic["thumbnail"])
 
-    print_row("Title", title)
-    print_row("ID", id)
-    print_row("Description", description)
-    print_row("ISBN", isbn)
-    print_row("Page Count", page_count)
-    print_row("Creators", creators)
-    print_row("Characters", characters)
-    print_row("Series", series)
-    print_row("Stories", stories)
-    print_row("Events", events)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Title", title},
+      {"ID", id},
+      {"Description", description},
+      {"ISBN", isbn},
+      {"Page Count", page_count},
+      {"Creators", creators},
+      {"Characters", characters},
+      {"Series", series},
+      {"Stories", stories},
+      {"Events", events},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   def format_event_output(event) do
@@ -90,18 +104,20 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(event["thumbnail"])
 
-    print_row("Title", title)
-    print_row("ID", id)
-    print_row("Description", description)
-    print_row("Start", start)
-    print_row("End", the_end)
-    print_row("Stories", stories)
-    print_row("Comics", comics)
-    print_row("Series", series)
-    print_row("Characters", characters)
-    print_row("Creators", creators)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Title", title},
+      {"ID", id},
+      {"Description", description},
+      {"Start", start},
+      {"End", the_end},
+      {"Stories", stories},
+      {"Comics", comics},
+      {"Series", series},
+      {"Characters", characters},
+      {"Creators", creators},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   def format_series_output(series) do
@@ -120,19 +136,21 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(series["thumbnail"])
 
-    print_row("Title", title)
-    print_row("ID", id)
-    print_row("Description", description)
-    print_row("Start Year", start_year)
-    print_row("End Year", end_year)
-    print_row("Rating", rating)
-    print_row("Stories", stories)
-    print_row("Comics", comics)
-    print_row("Events", events)
-    print_row("Characters", characters)
-    print_row("Creators", creators)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Title", title},
+      {"ID", id},
+      {"Description", description},
+      {"Start Year", start_year},
+      {"End Year", end_year},
+      {"Rating", rating},
+      {"Stories", stories},
+      {"Comics", comics},
+      {"Events", events},
+      {"Characters", characters},
+      {"Creators", creators},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   def format_story_output(story) do
@@ -149,17 +167,19 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(story["thumbnail"])
 
-    print_row("Title", title)
-    print_row("ID", id)
-    print_row("Description", description)
-    print_row("Type", type)
-    print_row("Comics", comics)
-    print_row("Series", series)
-    print_row("Events", events)
-    print_row("Characters", characters)
-    print_row("Creators", creators)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Title", title},
+      {"ID", id},
+      {"Description", description},
+      {"Type", type},
+      {"Comics", comics},
+      {"Series", series},
+      {"Events", events},
+      {"Characters", characters},
+      {"Creators", creators},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   def format_creator_output(creator) do
@@ -173,14 +193,16 @@ defmodule Marvel.CLI.Utils do
 
     image = format_thumbnail(creator["thumbnail"])
 
-    print_row("Name", name)
-    print_row("ID", id)
-    print_row("Comics", comics)
-    print_row("Series", series)
-    print_row("Events", events)
-    print_row("Stories", stories)
-    print_row("Image", image)
-    print_end()
+    [
+      {"Name", name},
+      {"ID", id},
+      {"Comics", comics},
+      {"Series", series},
+      {"Events", events},
+      {"Stories", stories},
+      {"Image", image}
+    ]
+    |> print_output(@output_config)
   end
 
   defp print_end() do
