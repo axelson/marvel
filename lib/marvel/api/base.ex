@@ -121,7 +121,7 @@ defmodule Marvel.API.Base do
   end
 
   defp timestamp() do
-    Timex.to_unix(Timex.now())
+    DateTime.utc_now() |> DateTime.to_unix()
   end
 
   defp default_config(), do: Application.get_env(:marvel, :marvel_api)

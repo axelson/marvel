@@ -33,7 +33,6 @@ defmodule Marvel.Mixfile do
     [
       {:httpoison, "~> 2.1"},
       {:jason, "~> 1.2"},
-      {:timex, "~> 3.7"},
       {:earmark, "~> 1.4", only: :dev},
       {:ex_doc, "~> 0.29.4", only: :dev},
       {:esbuild, "~> 0.7.1"},
