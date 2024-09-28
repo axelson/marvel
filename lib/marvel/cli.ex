@@ -1,5 +1,6 @@
 defmodule Marvel.CLI do
   @moduledoc false
+  require Logger
 
   @characters_command "characters"
   @creators_command "creators"
@@ -24,7 +25,8 @@ defmodule Marvel.CLI do
       series: :boolean,
       stories: :boolean,
       characters: :boolean,
-      creators: :boolean
+      creators: :boolean,
+      format: :string
     ]
 
     aliases = [
@@ -39,60 +41,69 @@ defmodule Marvel.CLI do
       cr: :creators
     ]
 
-    parse = OptionParser.parse(args, switches: switches, aliases: aliases)
+    {parsed, argv, _errors} = OptionParser.parse(args, switches: switches, aliases: aliases)
 
-    case parse do
-      {[id: _] = opts, [@characters_command], _} -> {:characters, opts}
-      {[id: _, comics: true] = opts, [@characters_command], _} -> {:characters, opts}
-      {[id: _, events: true] = opts, [@characters_command], _} -> {:characters, opts}
-      {[id: _, series: true] = opts, [@characters_command], _} -> {:characters, opts}
-      {[id: _, stories: true] = opts, [@characters_command], _} -> {:characters, opts}
-      {[search: _] = opts, [@characters_command], _} -> {:characters, opts}
-      {[name: _] = opts, [@characters_command], _} -> {:characters, opts}
-      {_, [@characters_command], _} -> {:characters}
-      {[id: _] = opts, [@comics_command], _} -> {:comics, opts}
-      {[id: _, characters: true] = opts, [@comics_command], _} -> {:comics, opts}
-      {[id: _, events: true] = opts, [@comics_command], _} -> {:comics, opts}
-      {[id: _, creators: true] = opts, [@comics_command], _} -> {:comics, opts}
-      {[id: _, stories: true] = opts, [@comics_command], _} -> {:comics, opts}
-      {[search: _] = opts, [@comics_command], _} -> {:comics, opts}
-      {[name: _] = opts, [@comics_command], _} -> {:comics, opts}
-      {_, [@comics_command], _} -> {:comics}
-      {[id: _] = opts, [@creators_command], _} -> {:creators, opts}
-      {[id: _, comics: true] = opts, [@creators_command], _} -> {:creators, opts}
-      {[id: _, events: true] = opts, [@creators_command], _} -> {:creators, opts}
-      {[id: _, series: true] = opts, [@creators_command], _} -> {:creators, opts}
-      {[id: _, stories: true] = opts, [@creators_command], _} -> {:creators, opts}
-      {[search: _] = opts, [@creators_command], _} -> {:creators, opts}
-      {[name: _] = opts, [@creators_command], _} -> {:creators, opts}
-      {_, [@creators_command], _} -> {:creators}
-      {[id: _] = opts, [@events_command], _} -> {:events, opts}
-      {[id: _, characters: true] = opts, [@events_command], _} -> {:events, opts}
-      {[id: _, comics: true] = opts, [@events_command], _} -> {:events, opts}
-      {[id: _, creators: true] = opts, [@events_command], _} -> {:events, opts}
-      {[id: _, series: true] = opts, [@events_command], _} -> {:events, opts}
-      {[id: _, stories: true] = opts, [@events_command], _} -> {:events, opts}
-      {[search: _] = opts, [@events_command], _} -> {:events, opts}
-      {[name: _] = opts, [@events_command], _} -> {:events, opts}
-      {_, [@events_command], _} -> {:events}
-      {[id: _] = opts, [@series_command], _} -> {:series, opts}
-      {[id: _, characters: true] = opts, [@series_command], _} -> {:series, opts}
-      {[id: _, comics: true] = opts, [@series_command], _} -> {:series, opts}
-      {[id: _, creators: true] = opts, [@series_command], _} -> {:series, opts}
-      {[id: _, events: true] = opts, [@series_command], _} -> {:series, opts}
-      {[id: _, stories: true] = opts, [@series_command], _} -> {:series, opts}
-      {[search: _] = opts, [@series_command], _} -> {:series, opts}
-      {[name: _] = opts, [@series_command], _} -> {:series, opts}
-      {_, [@series_command], _} -> {:series}
-      {[id: _] = opts, [@stories_command], _} -> {:stories, opts}
-      {[id: _, characters: true] = opts, [@stories_command], _} -> {:stories, opts}
-      {[id: _, comics: true] = opts, [@stories_command], _} -> {:stories, opts}
-      {[id: _, creators: true] = opts, [@stories_command], _} -> {:stories, opts}
-      {[id: _, events: true] = opts, [@stories_command], _} -> {:stories, opts}
-      {[id: _, series: true] = opts, [@stories_command], _} -> {:stories, opts}
-      {[search: _] = opts, [@stories_command], _} -> {:stories, opts}
-      {[name: _] = opts, [@stories_command], _} -> {:stories, opts}
-      {_, [@stories_command], _} -> {:stories}
+    # FIXME: Using the process dict like this is a hack because I don't want to
+    # change all the plumbing
+    case Keyword.get(parsed, :format) do
+      "json" -> Process.put(:output_config, :print_json)
+      "text" -> Process.put(:output_config, :print_lines)
+      nil -> :ok
+      other -> Logger.warning("Ignoring unknown output format \"#{inspect(other)}\"")
+    end
+
+    case {parsed, argv} do
+      {[id: _] = opts, [@characters_command]} -> {:characters, opts}
+      {[id: _, comics: true] = opts, [@characters_command]} -> {:characters, opts}
+      {[id: _, events: true] = opts, [@characters_command]} -> {:characters, opts}
+      {[id: _, series: true] = opts, [@characters_command]} -> {:characters, opts}
+      {[id: _, stories: true] = opts, [@characters_command]} -> {:characters, opts}
+      {[search: _] = opts, [@characters_command]} -> {:characters, opts}
+      {[name: _] = opts, [@characters_command]} -> {:characters, opts}
+      {_, [@characters_command]} -> {:characters}
+      {[id: _] = opts, [@comics_command]} -> {:comics, opts}
+      {[id: _, characters: true] = opts, [@comics_command]} -> {:comics, opts}
+      {[id: _, events: true] = opts, [@comics_command]} -> {:comics, opts}
+      {[id: _, creators: true] = opts, [@comics_command]} -> {:comics, opts}
+      {[id: _, stories: true] = opts, [@comics_command]} -> {:comics, opts}
+      {[search: _] = opts, [@comics_command]} -> {:comics, opts}
+      {[name: _] = opts, [@comics_command]} -> {:comics, opts}
+      {_, [@comics_command]} -> {:comics}
+      {[id: _] = opts, [@creators_command]} -> {:creators, opts}
+      {[id: _, comics: true] = opts, [@creators_command]} -> {:creators, opts}
+      {[id: _, events: true] = opts, [@creators_command]} -> {:creators, opts}
+      {[id: _, series: true] = opts, [@creators_command]} -> {:creators, opts}
+      {[id: _, stories: true] = opts, [@creators_command]} -> {:creators, opts}
+      {[search: _] = opts, [@creators_command]} -> {:creators, opts}
+      {[name: _] = opts, [@creators_command]} -> {:creators, opts}
+      {_, [@creators_command]} -> {:creators}
+      {[id: _] = opts, [@events_command]} -> {:events, opts}
+      {[id: _, characters: true] = opts, [@events_command]} -> {:events, opts}
+      {[id: _, comics: true] = opts, [@events_command]} -> {:events, opts}
+      {[id: _, creators: true] = opts, [@events_command]} -> {:events, opts}
+      {[id: _, series: true] = opts, [@events_command]} -> {:events, opts}
+      {[id: _, stories: true] = opts, [@events_command]} -> {:events, opts}
+      {[search: _] = opts, [@events_command]} -> {:events, opts}
+      {[name: _] = opts, [@events_command]} -> {:events, opts}
+      {_, [@events_command]} -> {:events}
+      {[id: _] = opts, [@series_command]} -> {:series, opts}
+      {[id: _, characters: true] = opts, [@series_command]} -> {:series, opts}
+      {[id: _, comics: true] = opts, [@series_command]} -> {:series, opts}
+      {[id: _, creators: true] = opts, [@series_command]} -> {:series, opts}
+      {[id: _, events: true] = opts, [@series_command]} -> {:series, opts}
+      {[id: _, stories: true] = opts, [@series_command]} -> {:series, opts}
+      {[search: _] = opts, [@series_command]} -> {:series, opts}
+      {[name: _] = opts, [@series_command]} -> {:series, opts}
+      {_, [@series_command]} -> {:series}
+      {[id: _] = opts, [@stories_command]} -> {:stories, opts}
+      {[id: _, characters: true] = opts, [@stories_command]} -> {:stories, opts}
+      {[id: _, comics: true] = opts, [@stories_command]} -> {:stories, opts}
+      {[id: _, creators: true] = opts, [@stories_command]} -> {:stories, opts}
+      {[id: _, events: true] = opts, [@stories_command]} -> {:stories, opts}
+      {[id: _, series: true] = opts, [@stories_command]} -> {:stories, opts}
+      {[search: _] = opts, [@stories_command]} -> {:stories, opts}
+      {[name: _] = opts, [@stories_command]} -> {:stories, opts}
+      {_, [@stories_command]} -> {:stories}
       _ -> :help
     end
   end
@@ -327,6 +338,8 @@ defmodule Marvel.CLI do
         -st --stories               the stories for the entity
         -ch --characters            the characters for the entity (does not work for creators)
         -ch --creators              the creators for the entity (does not work for characters)
+        --format json               print the output as JSON
+        --format text               print the output as text lines
     """)
   end
 end

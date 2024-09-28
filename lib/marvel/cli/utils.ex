@@ -5,7 +5,11 @@ defmodule Marvel.CLI.Utils do
 
   @default_output_config :print_lines
 
-  def process_results(result, format_fn, output_config \\ @default_output_config) do
+  def process_results(
+        result,
+        format_fn,
+        output_config \\ Process.get(:output_config, @default_output_config)
+      ) do
     case result do
       {:ok, response} ->
         case output_config do
