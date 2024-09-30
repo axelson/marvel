@@ -45,7 +45,10 @@ defmodule Marvel.CLI do
 
     # FIXME: Using the process dict like this is a hack because I don't want to
     # change all the plumbing
-    case Keyword.get(parsed, :format) do
+    # Also using the `pop` here is a bit of a workaound
+    {format, parsed} = Keyword.pop(parsed, :format)
+
+    case format do
       "json" -> Process.put(:output_config, :print_json)
       "text" -> Process.put(:output_config, :print_lines)
       nil -> :ok
