@@ -19,7 +19,7 @@ defmodule Marvel.CLI.Comics do
   end
 
   def search(searchText) do
-    Marvel.API.Comics.list(%{nameStartsWith: searchText})
+    Marvel.API.Comics.list(%{titleStartsWith: searchText})
     |> Utils.process_results(&Utils.format_comic_output/1)
   end
 
